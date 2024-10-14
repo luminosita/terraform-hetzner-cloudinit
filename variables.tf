@@ -29,11 +29,37 @@ variable "images" {
         vm_server_type  = string
 
         vm_cloud_init   = bool
-        vm_write_files  = bool
+
+        vm_ci_packages  = optional(object({
+            enabled = optional(bool)
+            content = optional(list(string))
+        }), {
+            enabled = true,
+            content = null
+        })
+
+        vm_ci_write_files  = optional(object({
+            enabled = optional(bool)
+            content = optional(list(object({
+                path = string
+                content = string
+            })))
+        }), {
+            enabled = true,
+            content = null
+        })
+
+        vm_ci_run_cmds  = optional(object({
+            enabled = optional(bool)
+            content = optional(list(string))
+        }), {
+            enabled = true,
+            content = null
+        })
+
+        vm_ci_reboot_enabled = optional(bool, false)
 
         vm_user         = optional(string)
         vm_ssh_public_key_files = optional(list(string))
-
-        vm_run_cmds     = optional(list(string))
     }))
 }

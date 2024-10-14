@@ -22,17 +22,14 @@ packages:
   - net-tools
   - jq
   - vim
+%{ if write-files ~}
 write_files:
   - path: /etc/ssh/sshd_config.d/01-harden-ssh.conf
     content: |
       PermitRootLogin no
       PasswordAuthentication no
       ChallengeResponseAuthentication no
-power_state:
-  delay: now
-  mode: reboot
-  message: Rebooting after cloud-init completion
-  condition: true
+%{ endif ~}
 runcmd:
   - localectl set-locale LANG=en_US.UTF-8
 %{ for cmd in run-cmds  ~}

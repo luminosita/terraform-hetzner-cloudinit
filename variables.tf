@@ -1,6 +1,7 @@
 variable "hcloud" {
     type        = object({
         ssh_public_key_file    = string
+        ssh_private_key_file    = string
     })
 }
 
@@ -28,6 +29,7 @@ variable "images" {
         vm_server_type  = string
 
         vm_cloud_init   = bool
+        vm_write_files  = bool
 
         vm_user         = optional(string)
         vm_ssh_public_key_files = optional(list(string))

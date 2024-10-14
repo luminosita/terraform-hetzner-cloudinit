@@ -40,5 +40,19 @@ resource "hcloud_server" "vm" {
     username      = var.images[each.key].vm_user
     pub-keys      = var.images[each.key].vm_ssh_public_key_files
     run-cmds      = var.images[each.key].vm_run_cmds
+    write-files   = var.images[each.key].vm_write_files
   }) : null
+
+  connection {
+    type            = "ssh"
+    user            = var.images[each.key].vm_user
+    host            = self.ipv4_address
+    timeout         = "1m"
+    agent           = false
+    private_key     = file(var.hcloud.ssh_private_key_file)    
+  }
+
+  provisioner "remote-exec" {
+    inline = [ "while [ ! -f /var/lib/cloud/instance/boot-finished ]; do echo 'Waiting for Cloud-Init...'; sleep 1; done" ]
+  }
 }

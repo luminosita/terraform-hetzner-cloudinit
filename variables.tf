@@ -29,7 +29,8 @@ variable "images" {
         vm_server_type  = string
 
         vm_cloud_init   = bool
-
+        vm_cloud_init_data  = optional(string)
+        
         vm_ci_packages  = optional(object({
             enabled = optional(bool)
             content = optional(list(string))

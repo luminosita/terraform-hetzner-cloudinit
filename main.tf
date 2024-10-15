@@ -19,6 +19,27 @@ resource "hcloud_primary_ip" "primary_ip" {
   auto_delete   = true
 }
 
+locals {
+    cloud-init-template-data = {
+        for k, v in var.images : k => var.images[k].vm_cloud_init ? templatefile("${path.module}/resources/cloud-init/vm-init.yaml.tftpl", {
+            hostname      = k
+            username      = var.images[k].vm_user
+            pub-keys      = var.images[k].vm_ssh_public_key_files
+            run-cmds-enabled        = var.images[k].vm_ci_run_cmds.enabled
+            run-cmds-content        = var.images[k].vm_ci_run_cmds.content
+            packages-enabled        = var.images[k].vm_ci_packages.enabled
+            packages-content        = var.images[k].vm_ci_packages.content
+            write-files-enabled     = var.images[k].vm_ci_write_files.enabled
+            write-files-content     = var.images[k].vm_ci_write_files.content
+            reboot-enabled          = var.images[k].vm_ci_reboot_enabled
+        }) : null
+    }
+
+    cloud-init-data = {
+        for k, v in var.images : k => var.images[k].vm_cloud_init_data == null ? local.cloud-init-template-data[k] : var.images[k].vm_cloud_init_data
+    }
+}
+
 resource "hcloud_server" "vm" {
   for_each = toset(distinct([for k, v in var.images : k]))
 
@@ -35,13 +56,7 @@ resource "hcloud_server" "vm" {
 
   ssh_keys = [ data.hcloud_ssh_key.default.public_key == null ? hcloud_ssh_key.default[0].id : data.hcloud_ssh_key.default.id ]
 
-  user_data = var.images[each.key].vm_cloud_init ? templatefile("${path.module}/resources/cloud-init/vm-init.yaml.tftpl", {
-    hostname      = var.images[each.key].vm_name
-    username      = var.images[each.key].vm_user
-    pub-keys      = var.images[each.key].vm_ssh_public_key_files
-    run-cmds      = var.images[each.key].vm_run_cmds
-    write-files   = var.images[each.key].vm_write_files
-  }) : null
+  user_data = local.cloud-init-data[each.key]
 
   connection {
     type            = "ssh"

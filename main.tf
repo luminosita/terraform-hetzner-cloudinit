@@ -68,6 +68,6 @@ resource "hcloud_server" "vm" {
   }
 
   provisioner "remote-exec" {
-    inline = [ "while [ ! -f /var/lib/cloud/instance/boot-finished ]; do echo 'Waiting for Cloud-Init...'; sleep 1; done" ]
+    inline = [ var.images[each.key].vm_cloud_init ? "while [ ! -f /var/lib/cloud/instance/boot-finished ]; do echo 'Waiting for Cloud-Init...'; sleep 1; done" : "" ]
   }
 }

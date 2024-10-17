@@ -30,7 +30,7 @@ variable "images" {
 
         vm_cloud_init   = bool
         vm_cloud_init_data  = optional(string)
-        
+
         vm_ci_packages  = optional(object({
             enabled = optional(bool)
             content = optional(list(string))
@@ -44,6 +44,11 @@ variable "images" {
             content = optional(list(object({
                 path = string
                 content = string
+                permissions = optional(string, "0644")
+                encoding = optional(string, "text/plain")
+                owner = optional(string, "root:root")
+                append = optional(string, "false")
+                defer = optional(string, "false")
             })))
         }), {
             enabled = true,

@@ -2,13 +2,6 @@ data "hcloud_ssh_key" "default" {
   name = "Gianni"
 }
 
-resource "hcloud_ssh_key" "default" {
-  count = data.hcloud_ssh_key.default.public_key == null ? 1 : 0
-
-  name       = "Gianni"
-  public_key = file(var.hcloud.ssh_public_key_file)
-}
-
 resource "hcloud_primary_ip" "primary_ip" {
   for_each = toset(distinct([for k, v in var.images : k]))
 
@@ -22,7 +15,7 @@ resource "hcloud_primary_ip" "primary_ip" {
 locals {
     cloud-init-template-data = {
         for k, v in var.images : k => var.images[k].vm_cloud_init ? templatefile("${path.module}/resources/cloud-init/vm-init.yaml.tftpl", {
-            hostname      = k
+            hostname      = var.images[k].vm_name
             username      = var.images[k].vm_user
             pub-keys      = var.images[k].vm_ssh_public_key_files
             run-cmds-enabled        = var.images[k].vm_ci_run_cmds.enabled
@@ -43,7 +36,7 @@ locals {
 resource "hcloud_server" "vm" {
   for_each = toset(distinct([for k, v in var.images : k]))
 
-  name        = var.images[each.key].vm_name
+  name        = each.key
   image       = var.os.vm_base_image != null ? var.os.vm_base_image : var.os.vm_snapshot_id
   datacenter  = var.images[each.key].vm_location
   server_type = var.images[each.key].vm_server_type
@@ -54,7 +47,7 @@ resource "hcloud_server" "vm" {
     ipv6_enabled = false
   }
 
-  ssh_keys = [ data.hcloud_ssh_key.default.public_key == null ? hcloud_ssh_key.default[0].id : data.hcloud_ssh_key.default.id ]
+  ssh_keys = [ data.hcloud_ssh_key.default.id ]
 
   user_data = local.cloud-init-data[each.key]
 

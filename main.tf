@@ -16,8 +16,8 @@ locals {
     cloud-init-template-data = {
         for k, v in var.images : k => var.images[k].vm_cloud_init ? templatefile("${path.module}/resources/cloud-init/vm-init.yaml.tftpl", {
             hostname      = var.images[k].vm_name
-            username      = var.images[k].vm_user
-            pub-keys      = var.images[k].vm_ssh_public_key_files
+            username      = var.images[k].vm_ci_user
+            pub-keys      = var.images[k].vm_ci_ssh_public_key_files
             run-cmds-enabled        = var.images[k].vm_ci_run_cmds.enabled
             run-cmds-content        = var.images[k].vm_ci_run_cmds.content
             packages-enabled        = var.images[k].vm_ci_packages.enabled

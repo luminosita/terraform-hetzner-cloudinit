@@ -31,6 +31,9 @@ variable "images" {
         vm_cloud_init   = bool
         vm_cloud_init_data  = optional(string)
 
+        vm_ci_user         = optional(string)
+        vm_ci_ssh_public_key_files = optional(list(string))
+
         vm_ci_packages  = optional(object({
             enabled = optional(bool)
             content = optional(list(string))
@@ -64,8 +67,5 @@ variable "images" {
         })
 
         vm_ci_reboot_enabled = optional(bool, false)
-
-        vm_user         = optional(string)
-        vm_ssh_public_key_files = optional(list(string))
     }))
 }
